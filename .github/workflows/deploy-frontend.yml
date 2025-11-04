@@ -1,0 +1,80 @@
+name: Deploy Frontend to GitHub Pages
+
+# Permissões: garantir que o GITHUB_TOKEN consiga escrever na branch
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Permitir apenas um deployment por vez
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - production
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: false
+        default: 'main'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "Instalando dependências com npm ci..."
+            npm ci
+          else
+            echo "Instalando dependências com npm install..."
+            npm install
+          fi
+
+      - name: Build frontend
+        env:
+          CI: false
+          PUBLIC_URL: /postpilot-frontend
+          REACT_APP_MAGENTO_GRAPHQL_URL: ${{ secrets.REACT_APP_MAGENTO_GRAPHQL_URL }}
+          REACT_APP_STRIPE_PUBLISHABLE_KEY: ${{ secrets.REACT_APP_STRIPE_PUBLISHABLE_KEY }}
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Add .nojekyll file
+        run: touch build/.nojekyll
+
+      - name: Add 404.html for SPA routing
+        run: cp build/index.html build/404.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
