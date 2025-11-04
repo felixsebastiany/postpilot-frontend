@@ -56,7 +56,7 @@ jobs:
       - name: Build frontend
         env:
           CI: false
-          PUBLIC_URL: /postpilot-frontend
+          PUBLIC_URL: /
           REACT_APP_MAGENTO_GRAPHQL_URL: ${{ secrets.REACT_APP_MAGENTO_GRAPHQL_URL }}
           REACT_APP_STRIPE_PUBLISHABLE_KEY: ${{ secrets.REACT_APP_STRIPE_PUBLISHABLE_KEY }}
         run: npm run build

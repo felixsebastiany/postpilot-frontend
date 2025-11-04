@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "PostPilot - SaaS para automatizar posts nas redes sociais",
   "private": true,
-  "homepage": "https://felixsebastiany.github.io/postpilot-frontend",
+  "homepage": "https://www.ai-postpilot.online",
   "dependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
